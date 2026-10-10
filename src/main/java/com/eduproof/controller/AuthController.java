@@ -55,11 +55,15 @@ public class AuthController {
         if (userRepository.existsByEmailIgnoreCase(email)) {
             return ResponseEntity.badRequest().body(new ApiError("An account with this email already exists."));
         }
+        String role = request.get("role");
+        if (role == null || role.isBlank()) {
+            role = "STUDENT";
+        }
         User user = new User();
         user.setName(name.trim());
         user.setEmail(email.trim());
         user.setPassword(passwordEncoder.encode(password));
-        user.setRole("STUDENT");
+        user.setRole(role.trim().toUpperCase());
         
 User savedUser = userRepository.save(user);
 String token = sessionStore.create(savedUser.getId());
