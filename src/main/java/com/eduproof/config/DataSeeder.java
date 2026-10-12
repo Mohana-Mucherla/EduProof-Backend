@@ -90,6 +90,23 @@ public class DataSeeder implements ApplicationRunner {
         if (adminUser.getId() == null) {
             userRepository.save(adminUser);
         }
+
+        // Synchronize any registered STUDENT users into students table
+        userRepository.findAll().stream()
+                .filter(u -> "STUDENT".equalsIgnoreCase(u.getRole()))
+                .forEach(u -> {
+                    if (studentRepository.findByEmailIgnoreCase(u.getEmail()).isEmpty()) {
+                        long count = studentRepository.count() + 1;
+                        String roll = String.format("22AG1A%04d", 500 + count);
+                        int offset = 1;
+                        while (studentRepository.existsByRollNumberIgnoreCase(roll)) {
+                            roll = String.format("22AG1A%04d", 500 + count + offset);
+                            offset++;
+                        }
+                        student(roll, u.getName(), u.getEmail(), "+91 9876543299", cse,
+                                "B.Tech", "4th Year", 2022, 2026, 8.50, u);
+                    }
+                });
     }
 
     private Department department(String code, String name) {

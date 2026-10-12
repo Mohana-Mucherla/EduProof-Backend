@@ -88,6 +88,10 @@ public class CertificateController {
 
     @PostMapping("/certificates")
     public ResponseEntity<?> issue(@RequestBody Map<String, Object> body) {
+        User user = requestAuth.currentUser();
+        if (user != null && !requestAuth.isAdmin()) {
+            return ResponseEntity.status(403).body(new ApiError("Only college administrators can issue certificates."));
+        }
         Long studentId = toLong(body.get("studentId"));
         Long typeId = toLong(body.get("certificateTypeId"));
         Student student = studentRepository.findById(studentId)
